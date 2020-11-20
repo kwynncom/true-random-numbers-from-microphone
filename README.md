@@ -71,6 +71,14 @@ rngtest: input channel speed: (min=6.209; avg=15.685; max=18.626)Gibits/s
 rngtest: FIPS tests speed: (min=51.971; avg=61.243; max=62.949)Mibits/s
 rngtest: Program run time: 5048 microseconds
 
+
+RELATED READING
+
+In the following blog entry, with audio file, I show a non-music file played as "music" that miserably fails randomness:
+https://kwynn.com/t/7/11/blog.html#2020-1120-arb-file-music
+
+
+
 CODE HISTORY
 
 2020/11/20, Friday, 4:40pm - project created moments ago, first code 3 minutes later
