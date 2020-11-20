@@ -22,6 +22,8 @@ I have done limited experimentation with a microphone attached.  I know that if 
 spike the data and make it non-random.  An obvious experiment is to try with the software input settings turned to zero / muted, which should either pass or 
 fail on a laptop mic that can't be easily turned off physically.
 
+I've tested with 10 seconds and I think 20.  I am pretty sure I've never had a single rngtest failure, which is better than some true hardware generators.
+
 **************
 The /v001 folder contains my earliest attempts.
 
