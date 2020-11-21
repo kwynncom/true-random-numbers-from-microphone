@@ -24,8 +24,13 @@ fail on a laptop mic that can't be easily turned off physically.
 
 I've tested with 10 seconds and I think 20.  I am pretty sure I've never had a single rngtest failure, which is better than some true hardware generators.
 
+44 is the size of a WAV (RIFF) header - http://www.topherlee.com/software/pcm-tut-wavformat.html
+
+I have to throw out between 40,000 - 50,000 bytes because they are not random until that range.  I am not sure why this is.  One theory is that it takes a moment for the
+recording system to calibrate how loud the input is.
+
 **************
-The /v001 folder contains my earliest attempts.
+The /v001 (possibly /arch/v001) folder contains my earliest attempts.
 
 The current index.php is rather ugly in several ways.  One is that the loops are partially redundant. I will likely clean it up, but I might not.  I wanted to get the 
 results out, and we'll see how long my interest is maintained.  

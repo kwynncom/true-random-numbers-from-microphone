@@ -1,65 +1,83 @@
 <?php
 
-$kuf = '/opt/kwynn/kwutils.php';
+require_once('/opt/kwynn/kwutils.php');
+require_once('screenOut.php');
 
-if (file_exists($kuf)) require_once($kuf);
-
-$cmd = 'arecord -f S32_LE -c 2 -d 1 -r 48000 --device="hw:0,0" ';
-$r = popen($cmd, 'rb'); unset($cmd);
-$allin = '';
-$wavhsize = 44;
-$ii = 50000 + $wavhsize;
-$colc = 0;
-$dout = '';
-
-$procing = false;
-while ($dat = fread($r, 20000000)) {
-    $allin .= $dat;
-    if (isset($allin[$ii + 8])) break;
-}
-
-while ($dat = fread($r, 20000000)) {
-    $allin .= $dat;
-    if (!isset($i)) for($j=0; $j < 8; $j++)  if (($ii + $j) % 8 === 5) { $i = $ii + $j; break; }
+class rand_mic {
+    const baseCmd = 'arecord -f S32_LE -c 2 -r 48000 --device="hw:0,0" -d ';
+    const magicModV10 = 4;
+    const alignByte = self::magicModV10 - 3;
+    const defaultDurationS = 1;
+    const discardFirstBytes = 51000;
+    const wavHeaderLen = 44;
+    const maxInputBytes = PHP_INT_MAX;
+    const maxOuputBytes = 1 << 30;
     
-    $c = $allin[$i];
-    echo sprintf('%02x ', ord($c));
-    $dout .= $c;
-    $colc++;
-    if ($colc > 52) {
-	echo "\n";
-	$colc = 0;
+    private function __construct() { 
+	$this->p10();    
+	$this->p40();
     }
     
-    $i += 8;
-}
+    private function getDuration() {
+	if (ispkwd()) return 20;
+	return self::defaultDurationS;
+    }
 
-if (!isset($i)) for($j=0; $j < 8; $j++)  if (($ii + $j) % 8 === 5) { $i = $ii + $j; break; }
-
-while (isset($allin[$i])) {
-    
-    $c = $allin[$i];
-    echo sprintf('%02x ', ord($c));
-    $dout .= $c;
-    $colc++;
-    if ($colc > 52) {
-	echo "\n";
-	$colc = 0;
+    private function p10() {
+	$mm = self::magicModV10;
+	$ab = self::alignByte;
+	$frl = self::discardFirstBytes + self::wavHeaderLen;
+	$m   = $frl % $mm;
+	if ($m !== $ab) $frl += $mm + $ab - $m;
+	kwas($frl % $mm === $ab, 'first read length does not align');
+	$this->p20($frl);
     }
     
-    $i += 8;
+    private function p20($firstPtr) {
+	
+	$cmd = self::baseCmd . self::getDuration();
+	$resource10 = popen($cmd, 'rb');
+	
+	$discarding = true;
+	$this->allin = '';
+	
+	while ($dat = fread($resource10, self::maxOuputBytes)) {
+	    $this->allin .= $dat;
+	    if   ($discarding && !isset($this->allin[$firstPtr])) continue;
+	    else $discarding = false;
+	    $this->p30($firstPtr);
+	}
+	
+	pclose($resource10);
+    }
     
+    private function p30($firstPtr) {
+	static $ptr = false;
+	if (!$ptr) {
+	    $ptr = $firstPtr;
+	    $this->allout = '';
+	}
+	
+	while (isset($this->allin[$ptr])) {
+	    $c = $this->allin[$ptr];
+	    $this->allout .= $c;
+	    $ptr += self::magicModV10;
+	    trandMicScreenOut($c);
+	}
+    }
+    
+    public static function doit() { new self(); }
+    
+    function p40() {
+	echo("\n" . number_format(strlen($this->allin)) . " bytes read\n");
+	fflush(STDOUT);
+	$cmd = 'rngtest';
+	$r = popen($cmd, 'wb');
+	fwrite($r, $this->allout);
+	// file_put_contents('/tmp/rd/out406.wav', $dout);
+    }
 }
 
-pclose($r); unset($r);
+rand_mic::doit();
 
 
-echo("\n" . number_format(strlen($allin)) . " bytes read\n");
-fflush(STDOUT);
-
-$cmd = 'rngtest';
-
-$r = popen($cmd, 'wb');
-fwrite($r, $dout);
-
-// file_put_contents('/tmp/rd/out406.wav', $dout);
