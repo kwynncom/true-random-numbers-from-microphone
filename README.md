@@ -22,7 +22,12 @@ I have done limited experimentation with a microphone attached.  I know that if 
 spike the data and make it non-random.  An obvious experiment is to try with the software input settings turned to zero / muted, which should either pass or 
 fail on a laptop mic that can't be easily turned off physically.
 
-I've tested with 10 seconds and I think 20.  I am pretty sure I've never had a single rngtest failure, which is better than some true hardware generators.
+My first versions only used one of the 2 channels.  Further testing shows that using both stereo channels is fine.  
+
+I've done several tests up to 20 seconds.  The failure rate seems comparable to a system using rngd with the rdrand CPU instructions available.  I understand that 
+rdrand is known to be intentionally compromised, so "my" technique may still be useful.  "My" technique is almost certainly much slower than rdrand, though, given 
+CPU-generated randomness versus a sample rate correlated to human hearing perception.  
+
 
 44 is the size of a WAV (RIFF) header - http://www.topherlee.com/software/pcm-tut-wavformat.html
 

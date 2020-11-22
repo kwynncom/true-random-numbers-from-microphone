@@ -19,7 +19,7 @@ class rand_mic {
     }
     
     private function getDuration() {
-	if (ispkwd()) return 20;
+	if (ispkwd()) return 1;
 	return self::defaultDurationS;
     }
 
