@@ -34,6 +34,13 @@ CPU-generated randomness versus a sample rate correlated to human hearing percep
 I have to throw out between 40,000 - 50,000 bytes because they are not random until that range.  I am not sure why this is.  One theory is that it takes a moment for the
 recording system to calibrate how loud the input is.
 
+**************
+The /v001 (possibly /arch/v001) folder contains my earliest attempts.
+
+The current index.php is rather ugly in several ways.  One is that the loops are partially redundant. I will likely clean it up, but I might not.  I wanted to get the 
+results out, and we'll see how long my interest is maintained.  
+
+
 *************
 REQUIREMENTS
 
