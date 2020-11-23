@@ -10,22 +10,28 @@ class rand_mic {
     const discardFirstBytes = 51000;
     const wavHeaderLen = 44;
     const maxOuputBytes = PHP_INT_MAX;
-    const maxReadBuf    = self::discardFirstBytes + self::wavHeaderLen + (1 << 18);
+    const maxReadBuf    = self::discardFirstBytes + self::wavHeaderLen + (1 << 20);
     const fifo = '/tmp/ns_kwynn_com_2020_11_1_hwrand';
-    const version = 'v0.0.4 - first FIFO version - 2020/11/23 00:19AM EST / GMT -5';
     
     private function __construct() {
-	
-	$this->p05();
-	$this->p10();    
+	$this->init10();
+	$this->init20();    
+	$this->doit10();
     }
     
-    private function p05() {
+    private function init10() {
 	if (!file_exists(self::fifo)) posix_mkfifo(self::fifo, 0644);
 	$this->outh = fopen(self::fifo, 'w');
+	$this->inh  = popen(self::baseCmd, 'rb');
     }
     
-    private function p10() {
+    private function __destruct() {
+	pclose($this->inh);
+	fclose($this->outh);
+	echo('destructor ran' . "\n");
+    }
+    
+    private function init20() {
 	$mm = self::magicModV10;
 	$ab = self::alignByte;
 	$frl = self::discardFirstBytes + self::wavHeaderLen;
@@ -33,19 +39,16 @@ class rand_mic {
 	if ($m !== $ab) $frl += $mm + $ab - $m;
 	kwas($frl % $mm === $ab, 'first read length does not align');
 	$this->randptr = $frl;
-	$this->p20();
+	$this->doit10();
     }
     
-    private function p20() {
-	
-	$cmd = self::baseCmd;
-	$resource10 = popen($cmd, 'rb');
-	
+    private function doit10() {
+
 	$discarding = true;
 	$initBuf = '';
 	$this->tdlen = 0;
 	
-	while ($batchin = fread($resource10, self::maxReadBuf)) {
+	while ($batchin = fread($this->inh, self::maxReadBuf)) {
 	    
 	    $batchlen = strlen($batchin);
 	    
@@ -66,18 +69,16 @@ class rand_mic {
 		$this->obbuf = $batchin; unset($batchin);
 	    }
 
-	    $this->p30();
+	    $this->doit20();
 	}
-	
-	pclose($resource10);
     }
     
-    private function p30() {
+    private function doit20() {
 	
 	while (isset($this->obbuf[$this->randptr - $this->oboffset])) {
 	    $c =     $this->obbuf[$this->randptr - $this->oboffset];
-	    $this->randptr += self::magicModV10;
 	    fwrite($this->outh, $c);
+	    $this->randptr += self::magicModV10;
 	}
     }
     
