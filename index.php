@@ -74,7 +74,7 @@ class rand_mic {
 	$cmd = 'rngtest';
 	$r = popen($cmd, 'wb');
 	fwrite($r, $this->allout);
-	// file_put_contents('/tmp/rd/out406.wav', $dout);
+	if (ispkwd()) file_put_contents('/tmp/rd/rand.wav', $this->allout);
     }
 }
 

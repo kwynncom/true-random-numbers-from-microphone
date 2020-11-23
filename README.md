@@ -82,11 +82,42 @@ rngtest: FIPS tests speed: (min=51.971; avg=61.243; max=62.949)Mibits/s
 rngtest: Program run time: 5048 microseconds
 
 
+FURTHER TESTING / MOVING TOWARDS PERMANENT USAGE
+
+In terminal 1, read from /dev/random:
+
+od -x /dev/random
+
+Without a specialized source, this will quickly slow down / block.
+
+Modify the file_put_contents of this program to write to /tmp/rand.wav or whatever you want.  Run this program and save the file.  
+
+Take one more look at what line the /dev/random read is at, then, in terminal 2:
+
+sudo rngd -r /tmp/rd/rand.wav
+
+/dev/random should output quite a bit of data immediately, in proportion to the random file size.
+
+Note that if you feed rngd an Ubuntu ISO or some such, it will silently reject the file as non-random, and /dev/random will not advance based on the ISO 
+file.  (It will advance a bit based on your keystrokes and mouse movement.)
+
+
 RELATED READING
 
 In the following blog entry, with audio file, I show a non-music file played as "music" that miserably fails randomness:
 https://kwynn.com/t/7/11/blog.html#2020-1120-arb-file-music
 
+
+FUTURE WORK
+
+I'm reasonably sure the same principle can be used to create a lightning detector.  In the case of the lightning detector, one would use more bytes or 
+all bytes.  I believe it would also work without any wire / headphones at all.
+
+Regarding lightning detection:
+
+https://thehackerdiary.wordpress.com/2017/05/24/lightning-detector-with-nothing-but-a-headphone-jack/
+
+Lightning detector with a simple headphone jack  MAY 24, 2017 [by] 153ARMSTRONG
 
 
 CODE HISTORY
