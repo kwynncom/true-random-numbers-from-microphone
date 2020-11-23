@@ -22,10 +22,10 @@ class rand_mic {
 	$this->inh  = popen(self::baseCmd, 'rb');
     }
     
-    private function __destruct() {
+    public function __destruct() {
 	pclose($this->inh);
 	fclose($this->outh);
-	echo('destructor ran' . "\n");
+	echo("\n" . 'destructor ran' . "\n");
     }
     
     private function calcInitPtr() {
