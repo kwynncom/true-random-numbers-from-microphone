@@ -90,7 +90,8 @@ od -x /dev/random
 
 Without a specialized source, this will quickly slow down / block.
 
-Modify the file_put_contents of this program to write to /tmp/rand.wav or whatever you want.  Run this program and save the file.  
+Modify the file_put_contents of this program to write to /tmp/rand.wav or whatever you want.  (I note below why I call it a WAV file.) 
+Run this program and save the file.  
 
 Take one more look at what line the /dev/random read is at, then, in terminal 2:
 
@@ -100,6 +101,31 @@ sudo rngd -r /tmp/rd/rand.wav
 
 Note that if you feed rngd an Ubuntu ISO or some such, it will silently reject the file as non-random, and /dev/random will not advance based on the ISO 
 file.  (It will advance a bit based on your keystrokes and mouse movement.)
+
+
+WAV FILES
+
+I call it a wav file simply because the following is a test of randomness.  If you get pure static / white noise, that's a good sign of randomness:
+
+aplay rand.wav
+
+aplay will play it as (hopefully) static as-is.  Note that VLC and presumably others need a WAV header.  I address that in "RELATED READING" below.
+
+Note that aplay will wait for a fifo, such as:
+
+terminal 1: 
+
+mkfifo rng
+aplay ./rng
+
+It will block / hang / wait.
+
+terminal 2:
+
+cat rand.wav > rng
+
+aplay will play the file.
+
 
 
 RELATED READING
@@ -117,7 +143,7 @@ Regarding lightning detection:
 
 https://thehackerdiary.wordpress.com/2017/05/24/lightning-detector-with-nothing-but-a-headphone-jack/
 
-Lightning detector with a simple headphone jack  MAY 24, 2017 [by] 153ARMSTRONG
+Lightning detector with a simple headphone jack  MAY 24, 2017 by 153ARMSTRONG
 
 
 CODE HISTORY
