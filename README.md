@@ -3,9 +3,22 @@ true random numbers from microphone
 
 From a microphone input, I am generating true random numbers that pass the "rngtest" command.  
 
+USAGE
+
+I create a FIFO (currently /tmp/ns_kwynn_com_2020_11_1_hwrand) and write random numers to it, so there are many options.  One is
+
+terminal 1: 
+php index.php 
+
+terminal 2:
+od -x /tmp/ns_kwynn_com_2020_11_1_hwrand
+
+
+MORE DETAILS
+
 I am using a desktop (Ubuntu Linux) microphone input with no microphone attached.  On the software / settings side, the microphone input is turned all the way up.  
 
-For each sound sample, I am taking the smallest-order byte out of 4 byte precision.  I am only taking bytes from one of the two (stereo) channels.
+For each sound sample, I am taking the smallest-order byte out of 4 byte precision.
 
 Higher bytes will usually be 0 or a fixed number because there is no microphone attached and thus no large dynamic (quiet to loud) variation.  I am assuming I am 
 picking up electric noise.  When a sample file is played, it sounds like white noise.
@@ -26,8 +39,7 @@ My first versions only used one of the 2 channels.  Further testing shows that u
 
 I've done several tests up to 20 seconds.  The failure rate seems comparable to a system using rngd with the rdrand CPU instructions available.  I understand that 
 rdrand is known to be intentionally compromised, so "my" technique may still be useful.  "My" technique is almost certainly much slower than rdrand, though, given 
-CPU-generated randomness versus a sample rate correlated to human hearing perception.  
-
+CPU-generated randomness versus a sample rate correlated to human hearing perception. 
 
 44 is the size of a WAV (RIFF) header - http://www.topherlee.com/software/pcm-tut-wavformat.html
 
@@ -46,6 +58,29 @@ OPTIONAL INSTALLS
 
 Its main use in this case is that it turn warnings, notices, etc. into exceptions that I don't catch in this case, so the program dies.  This setting will keep you 
 from getting pages of annoying errors; in such an event, the first one will kill the program.  
+**************
+FIFO VERSION TESTING
+
+TEST 1:
+
+terminal 1:
+php index.php
+
+terminal 2:
+sudo rngd -r /tmp/ns_kwynn_com_2020_11_1_hwrand
+
+terminal 3:
+
+od -x /dev/random
+**********************
+TEST 2:
+
+As long as index.php is running:
+
+rngtest -c 100 < /tmp/ns_kwynn_com_2020_11_1_hwrand
+
+(see more on rngtest below)
+
 
 ***** 
 RNGTEST
@@ -76,6 +111,28 @@ rngtest: Program run time: 5048 microseconds
 
 
 FURTHER TESTING / MOVING TOWARDS PERMANENT USAGE
+
+Now that I've moved to the FIFO version, you'd have to write a WAV file.  
+
+One option is
+
+terminal 1:
+aplay ns_kwynn_com_2020_11_1_hwrand
+
+It will wait for input.  Then run:
+
+terminal 2:
+php index.php
+
+There may be some disruption because the play gets ahead of the input.  Another option is
+
+Terminal 1:
+head -c 200000 ns_kwynn_com_2020_11_1_hwrand > head1.wav
+
+It will wait, then as above, run my program.  Then 
+
+aplay head1.wav
+
 
 In terminal 1, read from /dev/random:
 
@@ -142,4 +199,5 @@ Lightning detector with a simple headphone jack  MAY 24, 2017 by 153ARMSTRONG
 
 CODE HISTORY
 
+const version = 'v0.0.4 - first FIFO version - 2020/11/23 00:19AM EST / GMT -5';
 2020/11/20, Friday, 4:40pm - project created moments ago, first code 3 minutes later

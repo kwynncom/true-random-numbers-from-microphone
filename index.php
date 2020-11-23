@@ -12,6 +12,7 @@ class rand_mic {
     const maxOuputBytes = PHP_INT_MAX;
     const maxReadBuf    = self::discardFirstBytes + self::wavHeaderLen + (1 << 18);
     const fifo = '/tmp/ns_kwynn_com_2020_11_1_hwrand';
+    const version = 'v0.0.4 - first FIFO version - 2020/11/23 00:19AM EST / GMT -5';
     
     private function __construct() {
 	
