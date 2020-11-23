@@ -4,22 +4,19 @@ require_once('/opt/kwynn/kwutils.php');
 
 class rand_mic {
     const baseCmd = 'arecord -f S32_LE -c 2 -r 48000 --device="hw:0,0" ';
-    const magicModV10 = 4;
-    const alignByte = self::magicModV10 - 3;
-    const defaultDurationS = 1;
+    const byteInterval = 4;
+    const alignByte = self::byteInterval - 3; // the general calculation is more complicated, but I make it a separate const as a start towards general
     const discardFirstBytes = 51000;
     const wavHeaderLen = 44;
-    const maxOuputBytes = PHP_INT_MAX;
-    const maxReadBuf    = self::discardFirstBytes + self::wavHeaderLen + (1 << 20);
+    const maxReadBuf    = self::discardFirstBytes + self::wavHeaderLen + (1 << 19);
     const fifo = '/tmp/ns_kwynn_com_2020_11_1_hwrand';
     
     private function __construct() {
-	$this->init10();
-	$this->init20();    
-	$this->doit10();
+	$this->initIO();
+	$this->readLoop();
     }
     
-    private function init10() {
+    private function initIO() {
 	if (!file_exists(self::fifo)) posix_mkfifo(self::fifo, 0644);
 	$this->outh = fopen(self::fifo, 'w');
 	$this->inh  = popen(self::baseCmd, 'rb');
@@ -31,54 +28,53 @@ class rand_mic {
 	echo('destructor ran' . "\n");
     }
     
-    private function init20() {
-	$mm = self::magicModV10;
+    private function calcInitPtr() {
+	$bi = self::byteInterval;
 	$ab = self::alignByte;
-	$frl = self::discardFirstBytes + self::wavHeaderLen;
-	$m   = $frl % $mm;
-	if ($m !== $ab) $frl += $mm + $ab - $m;
-	kwas($frl % $mm === $ab, 'first read length does not align');
-	$this->randptr = $frl;
-	$this->doit10();
+	$ptr = self::discardFirstBytes + self::wavHeaderLen;
+	$m   = $ptr % $bi;
+	if ($m !== $ab) $ptr += $bi + $ab - $m;
+	kwas($ptr % $bi === $ab, 'first read length does not align');
+	return $ptr;
     }
     
-    private function doit10() {
+    private function discardThenInit($batchin) {
+	static $initBuf = '';
 
-	$discarding = true;
-	$initBuf = '';
+	$initBuf .= $batchin; unset($batchin);
+	if   (!isset($initBuf[$this->randptr])) return true;
+
+	$this->obbuf = $initBuf; unset($initBuf);
+	$this->oboffset = 0;
+	return false;
+    }
+    
+    private function readLoop() {
+
 	$this->tdlen = 0;
+	$this->randptr = self::calcInitPtr();
+	$discarding = true;
 	
 	while ($batchin = fread($this->inh, self::maxReadBuf)) {
 	    
 	    $batchlen = strlen($batchin);
-	    
 	    $this->tdlen += $batchlen;
 	    
-	    if ($discarding) {
-		$initBuf .= $batchin; unset($batchin);
-		$c1 = !isset($initBuf[$this->randptr]);
-		if   ($discarding && $c1) continue;
-		else {
-		    unset($c1);
-		    $this->obbuf = $initBuf; unset($initBuf);
-		    $this->oboffset = 0;
-		    $discarding = false;
-		}
-	    } else {
-		$this->oboffset += strlen($this->obbuf);
-		$this->obbuf = $batchin; unset($batchin);
-	    }
-
-	    $this->doit20();
+	    if  ($discarding && $this->discardThenInit($batchin)) continue;
+	    else $discarding = false; 
+	
+	    $this->oboffset += strlen($this->obbuf);
+	    $this->obbuf = $batchin; unset($batchin);
+	    $this->writeLoop();
 	}
     }
     
-    private function doit20() {
+    private function writeLoop() {
 	
 	while (isset($this->obbuf[$this->randptr - $this->oboffset])) {
 	    $c =     $this->obbuf[$this->randptr - $this->oboffset];
 	    fwrite($this->outh, $c);
-	    $this->randptr += self::magicModV10;
+	    $this->randptr += self::byteInterval;
 	}
     }
     
