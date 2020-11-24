@@ -22,9 +22,7 @@ because it needs arecord, which is part of the same package (see below).
 
 php index.php -raw -d1 | aplay
 
--d1 means 1 second of input, but the output is 12 seconds because it's a high-quality sample downgraded quite a bit, by default (see more specs below).  If you try to 
-play at the same rate as the recording, given in part that I'm using an interpreted language, the sound won't keep up.  You'll hear a bit of static, then silence, 
-and repeat.
+-d1 means 1 second of input, but the output is 12 seconds because it's a high-quality sample downgraded quite a bit, by default (see more specs below).
 
 If you have rngd installed (part of rng-tools, see more below):
 
@@ -130,7 +128,18 @@ https://wiki.archlinux.org/index.php/Rng-tools
 
 FUTURE WORK
 
+Write an output filter for rngtest.  rngtest is way too "noisy" for my usual purpose.
+
 Auto-detect the microhpone.
+
+The rngd man page says that the input "must support the Linux kernel /dev/random ioctl API."  I may look into that.  
+
+On a related point is turning this into a lower level, hwrand system.
+
+Yet another related point is writing this in C / C++.  
+
+If I could get the very basic / raw voltage readouts, and there are enough bits of data, the low order bits should be just as random as a sound recording circuit.
+
 
 FUTURE WORK - LIGHTNING DETECTOR
 
