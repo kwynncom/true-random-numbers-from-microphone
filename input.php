@@ -10,17 +10,19 @@ class rand_mic {
     
     private function __construct($ocb) {
 	$this->ocb = $ocb;
+	$this->doPArgs();
 	$this->initInput();
 	$this->readLoop();
     }
     
     private function initInput() {
-	$this->inh  = popen(self::baseCmd, 'rb');
+	$cmd = self::baseCmd;
+	if ($this->duration) $cmd .= ' -d ' . $this->duration;
+	$this->inh  = popen($cmd, 'rb');
     }
     
     public function __destruct() {
 	pclose($this->inh);
-	echo("\n" . 'input destructor ran' . "\n");
     }
     
     private function calcInitPtr() {
@@ -71,6 +73,25 @@ class rand_mic {
 	    call_user_func($this->ocb, $c);
 	    $this->randptr += self::byteInterval;
 	}
+    }
+    
+    public function doPArgs() {
+	global $argc;
+	global $argv;
+
+	$this->duration = false;
+	
+	if ($argc < 2) return;
+
+	$key = '-d';
+	$dattempt = false;
+	foreach($argv as $a) {
+	    if (substr(trim($a), 0, strlen($key)) === $key) $dattempt = true;
+	    if (preg_match('/-d=?(\d+)/', $a, $m)) { $this->duration = $m[1]; }
+	}
+	
+	kwas(!$dattempt || $this->duration, 'duration switch requires a positive integer with no space or an = such as -d=1 or -d1' . "\n");
+	
     }
     
     public static function doit($ocb) { new self($ocb); }

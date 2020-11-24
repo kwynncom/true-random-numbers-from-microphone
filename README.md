@@ -1,17 +1,34 @@
 # true-random-numbers-from-microphone
 true random numbers from microphone
 
-From a microphone input, I am generating true random numbers that pass the "rngtest" command.  
+From a microphone input, I am generating true random numbers that pass the "rngtest" command.
 
 USAGE
 
-I create a FIFO (currently /tmp/ns_kwynn_com_2020_11_1_hwrand) and write random numers to it, so there are many options.  One is
+Will result in around 1 second's worth of random hex numbers covering the screen:
 
-terminal 1: 
-php index.php 
+php index.php -x -d1
+OR
+php index.php -x -d=1
 
-terminal 2:
-od -x /tmp/ns_kwynn_com_2020_11_1_hwrand
+If you have rngtest:
+
+php index.php -raw -d1 | rngtest -c 30
+See sample output below.
+
+
+With the following command, if you have aplay, turn your speakers down and play 12 seconds of static.  If you don't have aplay, you can't use this program anyhow 
+because it needs arecord, which is part of the same package (see below).
+
+php index.php -raw -d1 | aplay
+
+-d1 means 1 second of input, but the output is 12 seconds because it's a high-quality sample downgraded quite a bit, by default (see more specs below).  If you try to 
+play at the same rate as the recording, given in part that I'm using an interpreted language, the sound won't keep up.  You'll hear a bit of static, then silence, 
+and repeat.
+
+If you have rngd installed (part of rng-tools, see more below):
+
+od -N 1000 -x /dev/random & php index.php -raw -d1 2> /dev/null | sudo rngd -f -r /dev/stdin 2> /dev/null
 
 
 MORE DETAILS
@@ -21,15 +38,15 @@ I am using a desktop (Ubuntu Linux) microphone input with no microphone attached
 For each sound sample, I am taking the smallest-order byte out of 4 byte precision.
 
 Higher bytes will usually be 0 or a fixed number because there is no microphone attached and thus no large dynamic (quiet to loud) variation.  I am assuming I am 
-picking up electric noise.  When a sample file is played, it sounds like white noise.
+picking up electric noise.  When a sample file is played, it sounds like white noise, although I note below that I get radio wave "whistlers."
 
 My settings are
 
 arecord -f S32_LE -c 2 -d 1 -r 48000 --device="hw:0,0" 
 
 which means: 32 bit (4 byte) signed precision sound samples, little endian (bytes with lower addresses are the smallest order bits), 2 channels (stereo), 
-48,000 samples per second.  I think I have to record in stereo, and 32 bits and 48,000 samples are the highest my hardware / software supports.  "-d 1" is one second 
-duration.  
+48,000 samples per second.  I think I have to record in stereo with my hardware, and 32 bits and 48,000 samples are the highest my hardware / software supports.  
+--device="hw:0,0" identifies the microphone in my case.  Future work may include automatic discovery of the microphone.
 
 I have done limited experimentation with a microphone attached.  I know that if the microphone is gently tapped with my finger, the sound is loud enough to 
 spike the data and make it non-random.  An obvious experiment is to try with the software input settings turned to zero / muted, which should either pass or 
@@ -46,43 +63,28 @@ CPU-generated randomness versus a sample rate correlated to human hearing percep
 I have to throw out between 40,000 - 50,000 bytes because they are not random until that range.  I am not sure why this is.  One theory is that it takes a moment for the
 recording system to calibrate how loud the input is.
 
+Another theory is based on something like this:
+
+arecord -f S32_LE -c 2 -d 4 -r 48000 --device="hw:0,0" -d 1 | aplay
+
+I sometimes get "pops" at the very beginning.  That would be a spike like tapping my finger on the mic.
+
 *************
 REQUIREMENTS
 
 sudo apt install alsa-utils
-sudo apt install rng-tools
+You may have to change the --device setting for your system.
+
 ******
 OPTIONAL INSTALLS
 
+sudo apt install rng-tools
+
 [/opt/kwynn/]kwutils.php is part of https://github.com/kwynncom/kwynn-php-general-utils
 
-Its main use in this case is that it turn warnings, notices, etc. into exceptions that I don't catch in this case, so the program dies.  This setting will keep you 
+Its main use in this case is that it turns warnings, notices, etc. into exceptions that I don't catch in this case, so the program dies.  This setting will keep you 
 from getting pages of annoying errors; in such an event, the first one will kill the program.  
 **************
-FIFO VERSION TESTING
-
-TEST 1:
-
-terminal 1:
-php index.php
-
-terminal 2:
-sudo rngd -r /tmp/ns_kwynn_com_2020_11_1_hwrand
-
-terminal 3:
-
-od -x /dev/random
-**********************
-TEST 2:
-
-As long as index.php is running:
-
-rngtest -c 100 < /tmp/ns_kwynn_com_2020_11_1_hwrand
-
-(see more on rngtest below)
-
-
-***** 
 RNGTEST
 
 sudo apt install rng-tools
@@ -110,76 +112,17 @@ rngtest: FIPS tests speed: (min=51.971; avg=61.243; max=62.949)Mibits/s
 rngtest: Program run time: 5048 microseconds
 
 
-FURTHER TESTING / MOVING TOWARDS PERMANENT USAGE
-
-Now that I've moved to the FIFO version, you'd have to write a WAV file.  
-
-One option is
-
-terminal 1:
-aplay ns_kwynn_com_2020_11_1_hwrand
-
-It will wait for input.  Then run:
-
-terminal 2:
-php index.php
-
-There may be some disruption because the play gets ahead of the input.  Another option is
-
-Terminal 1:
-head -c 200000 ns_kwynn_com_2020_11_1_hwrand > head1.wav
-
-It will wait, then as above, run my program.  Then 
-
-aplay head1.wav
-
-
-In terminal 1, read from /dev/random:
-
-od -x /dev/random
-
-Without a specialized source, this will quickly slow down / block.
-
-Modify the file_put_contents of this program to write to /tmp/rand.wav or whatever you want.  (I note below why I call it a WAV file.) 
-Run this program and save the file.  
-
-Take one more look at what line the /dev/random read is at, then, in terminal 2:
-
-sudo rngd -r /tmp/rd/rand.wav
-
-/dev/random should output quite a bit of data immediately, in proportion to the random file size.
+RNGD NOTE
 
 Note that if you feed rngd an Ubuntu ISO or some such, it will silently reject the file as non-random, and /dev/random will not advance based on the ISO 
 file.  (It will advance a bit based on your keystrokes and mouse movement.)
 
 
-WAV FILES
-
-I call it a wav file simply because the following is a test of randomness.  If you get pure static / white noise, that's a good sign of randomness:
-
-aplay rand.wav
-
-aplay will play it as (hopefully) static as-is.  Note that VLC and presumably others need a WAV header.  I address that in "RELATED READING" below.
-
-Note that aplay will wait for a fifo, such as:
-
-terminal 1: 
-
-mkfifo rng
-aplay ./rng
-
-It will block / hang / wait.
-
-terminal 2:
-
-cat rand.wav > rng
-
-aplay will play the file.
-
-
 RELATED READING
 
-In the following blog entry, with audio file, I show a non-music file played as "music" that miserably fails randomness:
+In the following blog entry, with audio file, I show a non-music file played as "music" that miserably fails randomness.  Note that in order to play the raw output 
+of my program in VLC or other media players, you have to go through the process I describe in that entry to add a WAV header.
+
 https://kwynn.com/t/7/11/blog.html#2020-1120-arb-file-music
 
 https://wiki.archlinux.org/index.php/Rng-tools
@@ -187,17 +130,17 @@ https://wiki.archlinux.org/index.php/Rng-tools
 
 FUTURE WORK
 
+Auto-detect the microhpone.
+
+FUTURE WORK - LIGHTNING DETECTOR
+
 I'm reasonably sure the same principle can be used to create a lightning detector.  In the case of the lightning detector, one would use more bytes or 
 all bytes.  I believe it would also work without any wire / headphones at all.
 
 Regarding lightning detection:
 
 https://thehackerdiary.wordpress.com/2017/05/24/lightning-detector-with-nothing-but-a-headphone-jack/
+-- Lightning detector with a simple headphone jack  MAY 24, 2017 by 153ARMSTRONG
 
-Lightning detector with a simple headphone jack  MAY 24, 2017 by 153ARMSTRONG
 
-
-CODE HISTORY
-
-const version = 'v0.0.4 - first FIFO version - 2020/11/23 00:19AM EST / GMT -5';
-2020/11/20, Friday, 4:40pm - project created moments ago, first code 3 minutes later
+Note that I occasionally hear radio wave "whistlers" when I play the audio file.  These are caused by lightning and, I think, other causes.
