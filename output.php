@@ -16,12 +16,15 @@ class rand_output {
 	global $argv;
 
 	$this->stdout = false;
-	$this->odx = false;
+	$this->odx = true;
 	
 	if ($argc < 2) return;
 
 	foreach($argv as $a) {
-	    if ($a === '-raw')	$this->stdout = true;
+	    if ($a === '-raw')	{
+		$this->stdout = true;
+		$this->odx    = false;
+	    }
 	    if ($a === '-x')	$this->odx = true;
 	}
     }
