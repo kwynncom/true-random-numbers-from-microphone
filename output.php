@@ -3,11 +3,16 @@
 class rand_output {
 
     public function __construct() {
+	$this->ocnt = 0;
 	$this->doPArgs();
     }
 
     public function out($c) {
-	if ($this->stdout) echo $c;
+	if ($this->stdout) {
+	    echo($c);
+	    if (++$this->ocnt) file_put_contents('/tmp/michwr_log.txt', $this->ocnt . " byte written\n", FILE_APPEND);
+	    
+	}
 	if ($this->odx) self::screenout($c);
     }
     
@@ -30,7 +35,6 @@ class rand_output {
     }
     
     private static function screenout($c) {
-	static $cols = 52;
 	static $cc   = 0;
 	static $colc = 0;
 	static $cs = '';
@@ -41,7 +45,7 @@ class rand_output {
 	$colc = $cc >> 1;
 	$cos .= sprintf('%02x ', ord($c));
 
-	if ($colc > 27) {
+	if ($colc > 12) {
 	    echo($cos . "\n");
 	    $colc = 0;
 	    $cs = '';
