@@ -2,16 +2,19 @@
 
 class rand_output {
 
+    const outlog = '/tmp/michwr_log.txt';
+    
     public function __construct() {
-	$this->ocnt = 0;
+	// $this->clearlog();
 	$this->doPArgs();
     }
 
+    private function clearlog() { file_put_contents(self::outlog, ''); }
+    
     public function out($c) {
 	if ($this->stdout) {
 	    echo($c);
-	    if (++$this->ocnt) file_put_contents('/tmp/michwr_log.txt', $this->ocnt . " byte written\n", FILE_APPEND);
-	    
+	    $this->logout($c);
 	}
 	if ($this->odx) self::screenout($c);
     }
@@ -34,7 +37,22 @@ class rand_output {
 	}
     }
     
-    private static function screenout($c) {
+    private function logout($c) {
+	static $cc = 0;
+	static $oat = false;
+	if (!$oat) $oat = time();
+	$cc++;
+	
+	if ($cc < 100) self::screenout($c, self::outlog);
+	else if ($cc === 100) file_put_contents(self::outlog, "first $cc random bytes written, moving to literal ... output\n", FILE_APPEND);
+	else if ($cc < 1000 && $cc % 50 === 0) file_put_contents(self::outlog, '.', FILE_APPEND);
+	else if ($cc % 10000 === 0) file_put_contents(self::outlog, '.', FILE_APPEND);
+	
+	
+	
+    }
+    
+    private static function screenout($c, $to = false) {
 	static $cc   = 0;
 	static $colc = 0;
 	static $cs = '';
@@ -46,7 +64,9 @@ class rand_output {
 	$cos .= sprintf('%02x ', ord($c));
 
 	if ($colc > 12) {
-	    echo($cos . "\n");
+	    $s = $cos . "\n";
+	    if (!$to) echo($s);
+	    else file_put_contents($to, $s, FILE_APPEND);
 	    $colc = 0;
 	    $cs = '';
 	    $cos = '';

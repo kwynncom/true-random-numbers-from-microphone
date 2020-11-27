@@ -3,6 +3,9 @@
 FIFO=/tmp/michwr_fifo
 INPID=/tmp/michwr_input.pid
 RNGDPID=/tmp/michwr_rngd.pid
+OUTLOG=/tmp/michwr_log.txt
+
+echo "" > $OUTLOG
 
 sudo echo "sudo is set"
 
@@ -16,7 +19,7 @@ then
     echo $! > $INPID
     sudo /usr/sbin/rngd -p $RNGDPID  -r $FIFO &
     echo "starting"
-    tail -F /tmp/michwr_log.txt
+    tail -c 1000 -F $OUTLOG
 else
              pkill -F $INPID
         sudo pkill --signal SIGKILL -F $RNGDPID
