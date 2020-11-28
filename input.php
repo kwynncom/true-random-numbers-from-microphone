@@ -2,6 +2,7 @@
 
 class rand_mic {
     const baseCmd = 'arecord -f S32_LE -c 2 -r 48000 --device="hw:0,0" ';
+    const recordStderrMsg1 = "Recording WAVE 'stdin'";
     const byteInterval = 4;
     const alignByte = self::byteInterval - 3; // the general calculation is more complicated, but I make it a separate const as a start towards general
     const discardFirstBytes = 51000;
@@ -30,7 +31,7 @@ class rand_mic {
     
     private function checkOpen() {
 	$s = fgets($this->pipes[2]);
-	$key = "Recording WAVE 'stdin'";
+	$key = self::recordStderrMsg1;
 	kwas(substr($s, 0, strlen($key)) === $key, 'did not get message: ' . $key);
     }
     
