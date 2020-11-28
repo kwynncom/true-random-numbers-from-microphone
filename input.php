@@ -31,7 +31,7 @@ class rand_mic {
     private function checkOpen() {
 	$s = fgets($this->pipes[2]);
 	$key = "Recording WAVE 'stdin'";
-	kwas(substr($s, 0, strlen($key)) === $key, 'did not get first line');
+	kwas(substr($s, 0, strlen($key)) === $key, 'did not get message: ' . $key);
     }
     
     public function __destruct() {
