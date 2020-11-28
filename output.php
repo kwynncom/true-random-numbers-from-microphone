@@ -17,7 +17,7 @@ class rand_output {
     }
     
     private function mkfifo($n) {
-	if (!file_exists($n)) posix_mkfifo($n);
+	if (!file_exists($n)) posix_mkfifo($n, 0644);
 	$this->fifo = fopen($n, 'w');
 	
     }

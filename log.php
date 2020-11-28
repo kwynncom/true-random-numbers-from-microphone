@@ -7,6 +7,7 @@ class rand_log {
     public static function out($c) {
 	static $cc = 0;
 	
+	// if ($cc === 0) self::test10();
 	// if ($cc === 0) self::doPArgs();
 	// if ($cc === 0) self::outFinal('initial entropy: ' . self::getEntropy() . "\n");
 	
@@ -34,7 +35,7 @@ class rand_log {
     }
     
     public static function getEntropy() {
-	return trim(shell_exec('cat /proc/sys/kernel/random/entropy_avail'));
+	return intval(trim(shell_exec('cat /proc/sys/kernel/random/entropy_avail')));
     }
     
     private static function doPArgs() {
@@ -50,7 +51,7 @@ class rand_log {
     
     public static function test10() {
 	
-	static $len = 2000;
+	static $len = 5000;
 	static $file = '/dev/random';
 	
 	$h = fopen($file, 'r');
@@ -59,7 +60,14 @@ class rand_log {
 	$e = microtime(1);
 	fclose($h);
 	if (strlen($r) !== $len) return;
-	echo("$len bytes read from $file in " . sprintf('%0.2f',($e - $b)) . ' seconds' . "\n");
+	
+	$d = $e - $b;
+	$ms = $d * 1000;
+	$s = sprintf('%0.2f', $ms);
+	
+	$ls = number_format($len);
+	$os = "OK / SUCCESS: $ls bytes read from $file in " . $s . ' milliseconds' . "\n";
+	echo($os);
 	
 	
     }

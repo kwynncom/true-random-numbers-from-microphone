@@ -1,3 +1,5 @@
 #! /bin/bash
 
-php ./index.php -raw | sudo rngd -r /dev/stdin
+RNGDPIDF=/tmp/michwr_rngd.pid
+
+php ./index.php -raw | sudo rngd -p $RNGDPIDF -r /dev/stdin
