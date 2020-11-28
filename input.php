@@ -22,7 +22,7 @@ class rand_mic {
 	$cmd = self::baseCmd;
 	if ($this->duration) $cmd .= ' -d ' . $this->duration;
 	
-	$pd = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
+	$pd = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
 	
 	$this->inpr = proc_open($cmd, $pd, $this->pipes);
 	$this->inh  = $this->pipes[1];
