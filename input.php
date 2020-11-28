@@ -7,8 +7,10 @@ class rand_mic {
     const discardFirstBytes = 51000;
     const wavHeaderLen = 44;
     const maxReadBuf    = self::discardFirstBytes + self::wavHeaderLen + (1 << 19);
+    const pidf = '/tmp/michwr_input.pid';
     
     private function __construct($ocb) {
+	file_put_contents(self::pidf, getmypid() . "\n");
 	$this->ocb = $ocb;
 	$this->doPArgs();
 	$this->initInput();

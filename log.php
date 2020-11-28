@@ -21,7 +21,15 @@ class rand_log {
     }
     
     public static function outFinal($s) {
-	if (1) echo $s;
+	
+	static $first = true;
+	
+	if ($first) {
+	    file_put_contents(self::logFile, '');
+	    $first = false;
+	}
+	
+	if (0) echo $s;
 	else file_put_contents(self::logFile, $s, FILE_APPEND);
     }
     
