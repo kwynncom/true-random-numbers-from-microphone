@@ -20,11 +20,23 @@ class rand_mic {
     private function initInput() {
 	$cmd = self::baseCmd;
 	if ($this->duration) $cmd .= ' -d ' . $this->duration;
-	$this->inh  = popen($cmd, 'rb');
+	
+	$pd = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
+	
+	$this->inpr = proc_open($cmd, $pd, $this->pipes);
+	$this->inh  = $this->pipes[1];
+	$this->checkOpen();
+    }
+    
+    private function checkOpen() {
+	$s = fgets($this->pipes[2]);
+	$key = "Recording WAVE 'stdin'";
+	kwas(substr($s, 0, strlen($key)) === $key, 'did not get first line');
     }
     
     public function __destruct() {
-	pclose($this->inh);
+	foreach($this->pipes as $p) fclose($p);
+	proc_close($this->inpr);
     }
     
     private function calcInitPtr() {
