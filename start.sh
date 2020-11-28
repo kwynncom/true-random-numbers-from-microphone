@@ -1,6 +1,6 @@
 #! /bin/bash
 
-FIFO=/tmp/michwr_fifo
+FIFO=/tmp/michwr_fifo_2002
 INPID=/tmp/michwr_input.pid
 RNGDPID=/tmp/michwr_rngd.pid
 OUTLOG=/tmp/michwr_log.txt
@@ -15,13 +15,16 @@ then
     then
             mkfifo $FIFO
     fi
-    /usr/bin/nohup /usr/bin/php ./index.php -raw & > $FIFO
+    nohup php ./index.php -raw -fifo=$FIFO "$@" &
+
+#  </dev/null &>/dev/null &
     echo $! > $INPID
     sudo /usr/sbin/rngd -p $RNGDPID -r $FIFO
-    echo "testing /dev/random"
+    disown -a
+# echo "testing /dev/random"
 # /usr/bin/php ./test.php
-    echo "starting"
-    tail -F $OUTLOG
+#    echo "starting"
+# tail -F $OUTLOG
 else
              pkill -F $INPID
         sudo pkill --signal SIGKILL -F $RNGDPID

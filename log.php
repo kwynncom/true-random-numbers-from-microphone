@@ -21,7 +21,8 @@ class rand_log {
     }
     
     public static function outFinal($s) {
-	file_put_contents(self::logFile, $s, FILE_APPEND);
+	if (1) echo $s;
+	else file_put_contents(self::logFile, $s, FILE_APPEND);
     }
     
     public static function getEntropy() {

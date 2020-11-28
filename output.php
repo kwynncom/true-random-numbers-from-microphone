@@ -9,11 +9,17 @@ class rand_output {
     }
     
     public function out($c) {
-	if ($this->stdout) {
-	    echo($c);
-	    rand_log::out($c);
-	}
+	if ($this->stdout) echo($c);
+	if ($this->fifo) fwrite($this->fifo, $c);
+	if ($this->stdout || $this->fifo) rand_log::out($c);
+	
 	if ($this->odx) self::screenout($c);
+    }
+    
+    private function mkfifo($n) {
+	if (!file_exists($n)) posix_mkfifo($n);
+	$this->fifo = fopen($n, 'w');
+	
     }
     
     public function doPArgs() {
@@ -22,6 +28,7 @@ class rand_output {
 
 	$this->stdout = false;
 	$this->odx = true;
+	$this->fifo = false;
 	
 	if ($argc < 2) return;
 
@@ -31,7 +38,12 @@ class rand_output {
 		$this->odx    = false;
 	    }
 	    if ($a === '-x')	$this->odx = true;
+	    if (preg_match('/fifo=(.+)/', $a, $m)) $this->mkfifo($m[1]);
+		
+	    
 	}
+	
+	if ($this->fifo) $this->stdout = false;
     }
     
     public static function screenout($c, $to = false) {
