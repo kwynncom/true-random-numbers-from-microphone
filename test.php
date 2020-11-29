@@ -50,7 +50,7 @@ class rand_test {
     }
     
     public static function echoEntropy() {
-	echo(number_format(self::getEntropy())  . " entropy pool bytes" . "\n");	
+	echo(number_format(self::getEntropy())  . " entropy, bits available" . "\n");	
     }
     
     public static function doit() {
