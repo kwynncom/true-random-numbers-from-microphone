@@ -1,4 +1,3 @@
 #! /bin/bash
-
-nohup ./start05.sh > /tmp/log 2>&1 &
-php test.php
+sudo echo "sudo authorized for this shell"
+nohup ./start_inner.sh > /dev/null 2>&1 &

@@ -1,7 +1,5 @@
 <?php
 
-require_once('log.php');
-
 class rand_output {
     
     public function __construct() {
@@ -11,8 +9,6 @@ class rand_output {
     public function out($c) {
 	if ($this->stdout) echo($c);
 	if ($this->fifo) fwrite($this->fifo, $c);
-	if ($this->stdout || $this->fifo) rand_log::out($c);
-	
 	if ($this->odx) self::screenout($c);
     }
     
@@ -46,7 +42,7 @@ class rand_output {
 	if ($this->fifo) $this->stdout = false;
     }
     
-    public static function screenout($c, $to = false) {
+    public static function screenout($c) {
 	static $cc   = 0;
 	static $colc = 0;
 	static $cs = '';
@@ -59,8 +55,7 @@ class rand_output {
 
 	if ($colc > 12) {
 	    $s = $cos . "\n";
-	    if (!$to) echo($s);
-	    else rand_log::outFinal($s);
+	    echo($s);
 	    $colc = 0;
 	    $cs = '';
 	    $cos = '';

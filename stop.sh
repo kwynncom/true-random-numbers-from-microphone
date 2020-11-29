@@ -3,6 +3,8 @@
 RNGDPIDF=/tmp/michwr_rngd.pid
 INPID=/tmp/michwr_input.pid
 
+sudo echo "sudo authorized for this shell"
+
 pkill -F $INPID
 sudo pkill --signal SIGKILL -F $RNGDPIDF
-echo "if all you see is this, stop probably worked"
+echo "if all you see is this and the sudo authorized message, stop probably worked"
