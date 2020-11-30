@@ -41,16 +41,18 @@ class rand_test {
     private function test10() {
 	
 	self::echoEntropy();
-	echo("Reading from " . self::inputFile . "...\n");
+	echo("Reading from " . self::inputFile . "  ...\n");
 	
 	$a = [1, 100, 500, 1000, 2000, 5000];
 	foreach($a as $n) $this->read($n);
 	echo(number_format($this->totn) . ' total bytes read' . "\n");
 	self::echoEntropy();
+	usleep(300000);
+	self::echoEntropy();	
     }
     
     public static function echoEntropy() {
-	echo(number_format(self::getEntropy())  . " entropy, bits available" . "\n");	
+	echo(number_format(self::getEntropy())  . ' bits of entropy available' . "\n");	
     }
     
     public static function doit() {
