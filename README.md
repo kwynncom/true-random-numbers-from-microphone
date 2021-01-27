@@ -3,6 +3,8 @@ true random numbers from microphone
 
 From a microphone input, I am generating true random numbers that pass the "rngtest" command.
 
+Regarding looking at this same data as signal rather than random noise, see my 2021/01/27 update below.
+
 USAGE
 
 Will result in around 1 second's worth of random hex numbers covering the screen:
@@ -153,3 +155,14 @@ https://thehackerdiary.wordpress.com/2017/05/24/lightning-detector-with-nothing-
 
 
 Note that I occasionally hear radio wave "whistlers" when I play the audio file.  These are caused by lightning and, I think, other causes.
+
+**************************
+SIGNAL RATHER THAN NOISE - UPDATE 2021/01/27
+
+See https://github.com/kwynncom/code-fragments/blob/14feac9521d92cef942a60513493530c41b66e28/shortwave/README.md
+
+In that experiment, I am seeking a signal from all the bytes rather than seeking random noise from one byte (out of 4 bytes).  I had assumed when 
+I wrote this random app that I was using the lowest-endian byte, and I probably am: I have not re-checked.  I misunderstood what the numbers looked 
+like, though.  In the signal experiment's README, I start to discuss the actual range of values.
+
+Also, based on my first experiments, I may be able to get something like 23 bits of randomness per sample (of 32 bits) rather than 8. 
