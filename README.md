@@ -120,6 +120,17 @@ file.  (It will advance a bit based on your keystrokes and mouse movement.)
 
 RELATED READING
 
+*******************
+This defines the FIPS 140-2 algorithms and their limitations
+
+https://locard.eu/attachments/article/71/fips.pdf
+"On the unbearable lightness of FIPS 140-2 randomness tests" by Darren Hurley-Smith, Constantinos Patsakis (Member, IEEE), and Julio Hernandez-Castro
+
+This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final 
+publication. Citation information: DOI 10.1109/TIFS.2020.2988505, IEEE Transactions on Information Forensics and Security
+
+*********************
+
 In the following blog entry, with audio file, I show a non-music file played as "music" that miserably fails randomness.  Note that in order to play the raw output 
 of my program in VLC or other media players, you have to go through the process I describe in that entry to add a WAV header.
 
