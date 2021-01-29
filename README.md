@@ -35,10 +35,23 @@ MORE DETAILS
 
 I am using a desktop (Ubuntu Linux) microphone input with no microphone attached.  On the software / settings side, the microphone input is turned all the way up.  
 
-For each sound sample, I am taking the smallest-order byte out of 4 byte precision.
+Each sample is 4 bytes / 32 bits.  I had previously assumed I was taking the lowest order byte.  Upon further experimentation, I don't think that's true.  
+I should be certain of that one way or another, but I may worry about that later or leave it to others.  Now I think I'm taking the 2nd lowest byte.  
 
-Higher bytes will usually be 0 or a fixed number because there is no microphone attached and thus no large dynamic (quiet to loud) variation.  I am assuming I am 
-picking up electric noise.  When a sample file is played, it sounds like white noise, although I note below that I get radio wave "whistlers."
+During the day, the average sample is around 2^30.  The background noise is such that only the one byte is consistently random.  I started to test whether 
+I could do 12 bits rather than 8, but then the sun went down.  During the day, I assume I am seeing powerful electric noise, mostly from the sun.
+
+From right around sunset to before nautical twilight, the numbers go to negative numbers, and once again only the one byte is random "enough."  At night, 
+ONLY that one byte is remotely random and everything else is 0 or 1 or 1 on one side of the random byte and 0 on the other, depending on how I deal with 
+a 32 bit sample versus a 64 bit native integer and negative numbers.
+
+At night the background noise drops to much lower level, but is has close enough to an 8 bit range.
+
+My recent experiments where I realized that I probably mistook the byte and otherwise gave me more insight are here:
+
+https://github.com/kwynncom/code-fragments/tree/13035e0ce2fc344f95a0a3171fce2c7bd89f9fb7/trng2
+
+When I play the output as sound, it sounds like white noise, although I note below that I get radio wave "whistlers."
 
 My settings are
 
@@ -166,6 +179,10 @@ https://thehackerdiary.wordpress.com/2017/05/24/lightning-detector-with-nothing-
 
 
 Note that I occasionally hear radio wave "whistlers" when I play the audio file.  These are caused by lightning and, I think, other causes.
+
+Specifically, I hear whistlers if I play back at a lower rate than the input.  The input is 12kHz or 12k samples per second, one byte out of 4 or 48,000 / 4.  
+I hear whistlers when playing this at an 8kHz sample rate.  When I play back at a 12kHz rate, the white noise / static sounds yet more like static, and I 
+don't hear whistlers, or not nearly as often.  
 
 **************************
 SIGNAL RATHER THAN NOISE - UPDATE 2021/01/27
