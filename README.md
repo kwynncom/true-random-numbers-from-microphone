@@ -16,7 +16,8 @@ php index.php -x -d=1
 If you have rngtest:
 
 php index.php -raw -d1 | rngtest -c 30
-See sample output below.
+
+See sample output below.  Note that this test still works fine, whether /dev/random blocks or not (see below).
 
 
 With the following command, if you have aplay, turn your speakers down and play 12 seconds of static.  If you don't have aplay, you can't use this program anyhow 
@@ -30,6 +31,8 @@ If you have rngd installed (part of rng-tools, see more below):
 
 od -N 1000 -x /dev/random & php index.php -raw -d1 2> /dev/null | sudo rngd -f -r /dev/stdin 2> /dev/null
 
+UPDATE: 2021/05 - It appears that the Linux kernel 5.8 /dev/random no longer blocks, so /dev/random is no longer a test of random input from my script or 
+any other.
 
 MORE DETAILS
 
@@ -130,6 +133,8 @@ RNGD NOTE
 Note that if you feed rngd an Ubuntu ISO or some such, it will silently reject the file as non-random, and /dev/random will not advance based on the ISO 
 file.  (It will advance a bit based on your keystrokes and mouse movement.)
 
+UPDATE: 2021/05 - It appears that the Linux kernel 5.8 /dev/random no longer blocks, so /dev/random is no longer a test of random input from an ISO or anything 
+else.
 
 RELATED READING
 
@@ -194,3 +199,21 @@ I wrote this random app that I was using the lowest-endian byte, and I probably 
 like, though.  In the signal experiment's README, I start to discuss the actual range of values.
 
 Also, based on my first experiments, I may be able to get something like 23 bits of randomness per sample (of 32 bits) rather than 8. 
+*************
+UPDATE 2021/05
+
+Regarding /dev/random not blocking, I wanted to capture some keywords / names / sources for context:
+
+https://lwn.net/Articles/808575/
+Removing the Linux /dev/random blocking pool
+By Jake Edge  January 7, 2020
+
+"Andy Lutomirski posted version 3 of the patch set toward the end of December [2019, I assume]...."
+
+"Theodore Y. Ts'o, who is the maintainer of the Linux random-number subsystem, appears to have changed his mind along the way about the need for a blocking pool. 
+He said that removing that pool would effectively get rid of the idea that Linux has a true random-number generator (TRNG), which 'is not insane; this is what 
+the *BSD's have always done'...."
+
+I am reasonably sure the change is in the Linux kernel 5.8, although I don't know exactly which 3rd level version.
+
+I see that kernel 4.15 does still block.

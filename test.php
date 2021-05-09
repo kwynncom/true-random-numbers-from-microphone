@@ -6,6 +6,9 @@ class rand_test {
 
     const inputFile = '/dev/random';
     
+    // UPDATE: 2021/05 - It appears that the Linux kernel 5.8 /dev/random no longer blocks, so /dev/random is no longer a test of random input from my 
+    // script or any other.  See new test.sh
+    
     private function __construct() {
 	$this->totn = 0;
 	$this->inh = fopen(self::inputFile, 'r');
